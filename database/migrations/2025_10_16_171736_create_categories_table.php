@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string("slug");
             $table->string("heading");
             $table->string("logo");
+            $table->string("banner")->nullable();
             $table->longText("description");
             $table->foreignId("shop_id")->constrained()->cascadeOnDelete();
             $table->timestamps();

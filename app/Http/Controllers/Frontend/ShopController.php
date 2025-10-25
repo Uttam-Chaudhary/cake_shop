@@ -10,6 +10,14 @@ use Illuminate\Support\Facades\Mail;
 
 class ShopController extends BaseController
 {
+    // public function buyNow (Request $request, $id){
+    //      $request->validate([
+    //         'message'  => 'required|max:20|min:1',
+    //         'flavour_id' => 'required',
+    //         'date' => 'required|date_format:Y-m-d',
+    //     ]);
+    //     return $request;
+    // }
     public function store(Request $request)
     {
         $request->validate([

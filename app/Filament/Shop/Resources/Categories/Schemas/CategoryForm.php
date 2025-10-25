@@ -24,6 +24,8 @@ class CategoryForm
                 RichEditor::make('description')
                     ->required()
                     ->columnSpanFull(),
+                FileUpload::make('banner')
+                    ->default(null),
                 FileUpload::make('logo')
                     ->required()
                     ->default(null),

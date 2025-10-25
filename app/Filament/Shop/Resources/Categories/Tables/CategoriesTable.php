@@ -26,6 +26,8 @@ class CategoriesTable
                     ->searchable(),
                 ImageColumn::make('logo')
                     ->searchable(),
+                ImageColumn::make('banner')
+                    ->searchable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
