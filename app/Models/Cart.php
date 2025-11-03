@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Cart extends Model
 {
+        protected $fillable = ['user_id','product_id','shop_id','qty'];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -15,5 +17,9 @@ class Cart extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+    public function shop(): BelongsTo
+    {
+        return $this->belongsTo(Shop::class);
     }
 }

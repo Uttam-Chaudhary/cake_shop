@@ -13,6 +13,8 @@ class CartController extends BaseController
     public function index()
     {
         $carts = Cart::where("user_id", Auth::user()->id)->get();
+
+      //  return $flavours;
         return view('frontend.carts', compact('carts'));
     }
     public function store(Request $request, $id)
@@ -35,6 +37,7 @@ class CartController extends BaseController
         $cart->amount = $amount;
         $cart->product_id = $product->id;
         $cart->user_id = Auth::user()->id;
+        $cart->shop_id = $product->shop_id;
         $cart->save();
         toast("Product added to cart", 'success');
         return redirect()->route('home');

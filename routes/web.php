@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Frontend\CartController;
+use App\Http\Controllers\Frontend\OrderController;
 use App\Http\Controllers\Frontend\PageController;
 use App\Http\Controllers\Frontend\ShopController;
 use App\Http\Controllers\ProfileController;
@@ -27,16 +28,23 @@ Route::middleware('auth')->group(function () {
     Route::get("/carts", [CartController::class, 'index'])->name("cart.index");
     Route::patch("/cart/update/{id}", [CartController::class, 'update'])->name("cart.update");
     Route::delete("/cart/delete/{id}", [CartController::class, 'destroy'])->name("cart.destroy");
+    Route::post("/checkout/buyNow/{id}", [OrderController::class, 'buyNow'])->name("checkout.buyNow");
 
-    
+    Route::get("/orders", [OrderController::class, 'index'])->name("order");
+    Route::post('/checkout/select', [OrderController::class, 'select'])->name('checkout.select');
+    Route::post("/order/store/{id}", [OrderController::class, 'store'])->name("order.store");
+
+    Route::post('/checkout/place', [OrderController::class, 'placeOrder'])->name('checkout.place');
+
+    Route::get("/khalti/callback", [OrderController::class, 'khalti_callback'])->name("khalti.callback");
 });
-require __DIR__ . '/auth.php';
 
+Route::get("/receipt/{id}", [PageController::class, 'receipt'])->name("receipt");
 Route::get('/', [PageController::class, 'home'])->name('home');
-Route::post("/shop/store", [ShopController::class, 'store'])->name("shop.store");
-Route::post("/checkout/buyNow/{id}", [ShopController::class, 'buyNow'])->name("checkout.buyNow");
 Route::get("/search", [PageController::class, 'search'])->name("search");
+Route::post("/shop/store", [ShopController::class, 'store'])->name("shop.store");
 
+require __DIR__ . '/auth.php';
 
 // Login with google routes
 Route::get('/redirect', function () {

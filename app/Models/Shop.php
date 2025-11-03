@@ -59,4 +59,18 @@ class Shop extends Authenticatable
     {
         return $this->hasMany(Product::class);
     }
+
+    public function carts(): HasMany
+    {
+        return $this->hasMany(Cart::class);
+    }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+    public function flavours(): HasMany
+    {
+        return $this->hasMany(Flavour::class);
+    }
 }

@@ -4,7 +4,7 @@
             <!-- Breadcrumbs -->
             <nav class="text-sm text-gray-500 mb-3" aria-label="Breadcrumb">
                 <ol class="flex gap-2 items-center">
-                    <li><a href="#" class="hover:underline text-black">Home</a></li>
+                    <li><a href="{{ route('home') }}" class="hover:underline text-black">Home</a></li>
                     <li>/</li>
                     <li class="text-gray-700">{{ $product->name }}</li>
                 </ol>
@@ -28,7 +28,7 @@
                     </div>
                 </div>
                 <div>
-                     <form action="{{ route('cart.store', $product->id) }}" method="post">
+                    <form action="{{ route('cart.store', $product->id) }}" method="post">
                         @csrf
                         <input type="hidden" name="weight" id="selected-weight"
                             value="{{ $product->weights[0]['weight'] ?? '' }}">
@@ -36,8 +36,11 @@
 
                         <h1 class="text-xl font-semibold">{{ $product->name }}</h1>
                         <h2 id="product-price" class="text-xl mt-3 font-semibold">
-                            Rs. {{ number_format($product->price, 2) }}
+                            Rs.{{ number_format($product->price - ($product->price * $product->discount_percentage) / 100, 2) }}
                         </h2>
+                        @if ($product->discount_percentage > 0)
+                        <span class="text-red-500">({{ $product->discount_percentage }}% off)</span>
+                        @endif
                         <h3 class="mt-3 text-black">Choose Weight (in pound)</h3>
                         <div id="weight-buttons" class="flex flex-wrap gap-2 mt-2">
                             @foreach ($product->weights as $w)
@@ -54,6 +57,7 @@
                             <label for="message" class="block text-md font-medium text-gray-900 mb-1">Message on
                                 Cake</label>
                             <input id="message" type="text" name="message" placeholder="Enter message on cake"
+                                value="{{ old('message') }}"
                                 class="block h-12 w-full bg-white py-1.5 px-3 text-base text-gray-900 placeholder:text-gray-400
             focus:outline-none focus:ring-2 rounded"
                                 style="--tw-ring-color: var(--secondary);" />
@@ -64,7 +68,7 @@
                             <label for="flavour" class="block text-md font-medium mt-3">Choose flavour</label>
                             <select id="flavour" name="flavour_id"
                                 class="mt-1 block w-full rounded-md border-gray-300">
-                                <option value="">Select a flavour</option>
+                                <option value=" {{ old('flavour_id') }}">Select a flavour</option>
                                 @foreach ($product->flavours as $flavour)
                                     <option value="{{ $flavour->id }}"
                                         {{ old('flavour_id') == $flavour->id ? 'selected' : '' }}>
@@ -80,7 +84,7 @@
 
                         <div class=" mt-3 bg-yellow-100 border-2 border-red-300 rounded-sm p-3 gap-3"> <label
                                 for="date" class=" text-sm font-medium text-gray-900 ">Select Delivery Date</label>
-                            <input type="date" name="date" min="{{ date('Y-m-d') }}"
+                            <input type="date" name="date" min="{{ date('Y-m-d') }}" value=" "
                                 class="border border-gray-300 rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                             @error('date')
                                 <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
@@ -103,10 +107,10 @@
                                 <i class="fas fa-shopping-cart mr-2"></i> Add to Cart
                             </button>
 
-                             <button type="submit" formaction="{{ route('checkout.buyNow', $product->id) }}"
-                            class="bg-[var(--primary)] hover:bg-[var(--secondary)] text-white py-3 px-6 rounded-lg flex items-center transition-colors">
-                            <i class="fa-solid fa-bag-shopping mr-2"></i> Buy Now
-                        </button>
+                            <button type="submit" formaction="{{ route('checkout.buyNow', $product->id) }}"
+                                class="bg-[var(--primary)] hover:bg-[var(--secondary)] text-white py-3 px-6 rounded-lg flex items-center transition-colors">
+                                <i class="fa-solid fa-bag-shopping mr-2"></i> Buy Now
+                            </button>
                         </div>
                     </form>
                     <div class=" mt-3">
@@ -126,10 +130,8 @@
         function changeImage(src) {
             document.getElementById('mainImage').src = src;
         }
-
-
         document.addEventListener("DOMContentLoaded", function() {
-            const basePrice = {{ $product->price / $product->weights[0]['weight'] }};
+            const basePrice = {{ ($product->price - ($product->price * $product->discount_percentage) / 100 )/ $product->weights[0]['weight'] }};
             const priceElement = document.getElementById("product-price");
             const weightButtons = document.querySelectorAll("#weight-buttons button");
 

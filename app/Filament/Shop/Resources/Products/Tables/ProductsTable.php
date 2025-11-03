@@ -5,6 +5,7 @@ namespace App\Filament\Shop\Resources\Products\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
@@ -21,10 +22,13 @@ class ProductsTable
                 TextColumn::make('category.title')
                     ->sortable()
                     ->searchable(),
+                    ImageColumn::make('images')
+                    ->searchable(),
                 TextColumn::make('price')
                     ->money('Rs.')
                     ->sortable(),
                 TextColumn::make('discount_percentage')
+                    ->label('Discount')
                     ->numeric()
                     ->suffix(' %')
                     ->sortable(),

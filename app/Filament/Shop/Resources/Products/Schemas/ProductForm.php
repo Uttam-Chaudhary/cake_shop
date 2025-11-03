@@ -3,11 +3,13 @@
 namespace App\Filament\Shop\Resources\Products\Schemas;
 
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Auth;
 
 class ProductForm
 {
@@ -20,7 +22,19 @@ class ProductForm
                     ->required(),
                 Select::make('flavours')
                     ->multiple()                     // allows multiple selections
-                    ->relationship('flavours', 'names')
+                    ->relationship(
+                        'flavours',
+                        'names',
+                        modifyQueryUsing: fn($query) => $query->where('shop_id', Auth::guard('shop')->user()->id)
+
+                    )
+                    ->createOptionForm([
+                         Hidden::make('shop_id')
+                            ->default(Auth::guard('shop')->user()->id),
+                        TextInput::make('names')
+                            ->label('Flavour Name')
+                            ->required(),
+                    ])
                     ->label('Flavours')
                     ->preload(),
                 TextInput::make('name')
