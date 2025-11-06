@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Frontend\CartController;
+use App\Http\Controllers\Frontend\LocationController;
 use App\Http\Controllers\Frontend\OrderController;
 use App\Http\Controllers\Frontend\PageController;
 use App\Http\Controllers\Frontend\ShopController;
@@ -11,10 +12,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use Laravel\Socialite\Facades\Socialite;
 
-
-// Route::get('/', function () {
-//     return view('welcome');
-// });
 Route::get('/dashboard', function () {
     return redirect()->route('home');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -24,18 +21,22 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::post("/cart/store/{id}", [CartController::class, 'store'])->name("cart.store");
     Route::get("/carts", [CartController::class, 'index'])->name("cart.index");
-    Route::patch("/cart/update/{id}", [CartController::class, 'update'])->name("cart.update");
+    Route::post("/cart/store/{id}", [CartController::class, 'store'])->name("cart.store");
+    Route::patch("/cart/update/{id}", [CartController::class, 'update_qty'])->name("cart.update");
     Route::delete("/cart/delete/{id}", [CartController::class, 'destroy'])->name("cart.destroy");
-    Route::post("/checkout/buyNow/{id}", [OrderController::class, 'buyNow'])->name("checkout.buyNow");
+
+    Route::get('/cart/{id}/edit', [CartController::class, 'edit'])->name('cart.edit');
+    Route::patch('/cart/{id}', [CartController::class, 'update'])->name('cart.update');
+    Route::post("/checkout/buyNow/{id}", [CartController::class, 'buyNow'])->name("checkout.buyNow");
 
     Route::get("/orders", [OrderController::class, 'index'])->name("order");
     Route::post('/checkout/select', [OrderController::class, 'select'])->name('checkout.select');
     Route::post("/order/store/{id}", [OrderController::class, 'store'])->name("order.store");
 
-    Route::post('/checkout/place', [OrderController::class, 'placeOrder'])->name('checkout.place');
+    Route::get('/get-delivery-fee/{id}', [LocationController::class, 'getDeliveryFee']);
 
+    Route::post('/checkout/place', [OrderController::class, 'placeOrder'])->name('checkout.place');
     Route::get("/khalti/callback", [OrderController::class, 'khalti_callback'])->name("khalti.callback");
 });
 

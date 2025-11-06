@@ -18,6 +18,8 @@ return new class extends Migration
             $table->foreignId('shop_id')->constrained()->cascadeOnDelete();
             $table->string('status')->default('pending');
             $table->double('total_amount');
+            $table->double('delivery_fee');
+            $table->string('location');
             $table->string('contact');
             $table->string('delivery_address');
             $table->date('delivery_date');

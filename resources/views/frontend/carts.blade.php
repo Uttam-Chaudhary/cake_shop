@@ -32,7 +32,7 @@
                                                 <input type="checkbox" name="selected_carts[]"
                                                     value="{{ $cart->id }}"
                                                     class="cart-checkbox h-5 w-5 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300"
-                                                    data-amount="{{ $cart->amount }}">
+                                                    data-amount="{{ $cart->amount }}" data-shop="{{ $shopId }}">
                                             </label>
                                         </div>
 
@@ -55,11 +55,14 @@
                                                             @php
                                                                 $flavour = \App\Models\Flavour::find($cart->flavour_id);
                                                             @endphp
-                                                            {{$flavour->names}}
+                                                            {{ $flavour->names }}
                                                         </h3>
                                                         <h3 class=" text-black">Weight:
                                                             {{ $cart->weight }}
                                                             Pound</h3>
+                                                        <h3 class=" truncate text-black">Message:
+                                                            {{ $cart->message }}
+                                                        </h3>
                                                     </div>
                                                 </div>
 
@@ -69,7 +72,8 @@
                                                         <!-- Edit -->
                                                         <button type="button"
                                                             class="p-1 rounded hover:bg-gray-100 text-gray-600"
-                                                            title="Edit" aria-label="Edit item">
+                                                            title="Edit" aria-label="Edit item"
+                                                            onclick="editCart({{ $cart->id }})">
                                                             <!-- pencil icon -->
                                                             <i class="fa-solid fa-pencil"></i>
                                                         </button>
@@ -118,6 +122,8 @@
                                 </div>
                             @endforeach
                         @endforeach
+
+
                     @endif
                 </div>
                 <div class="col-span-4">
@@ -166,67 +172,234 @@
         </form>
     </div>
 
+
+    <!-- Edit Cart Modal -->
+    <div id="editCartModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-xl mx-4">
+            <div class="px-6 py-4 border-b">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold">Edit Cart Item</h3>
+                    <button type="button" onclick="closeEditModal()" class="text-gray-500 hover:text-gray-800">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <form id="editCartForm" class="px-6 py-4" onsubmit="submitEditForm(event)">
+                @csrf
+                @method('PATCH')
+
+                <input type="hidden" id="editCartId" name="cart_id" value="">
+
+                <!-- Flavour -->
+                <div class="mb-4">
+                    <label for="editFlavour" class="block text-sm font-medium text-gray-700">Flavour</label>
+                    <select id="editFlavour" name="flavour_id" class="mt-1 block w-full rounded-md border-gray-300">
+                        <option value="">-- Select flavour --</option>
+                        <!-- options populated by JS -->
+                    </select>
+                </div>
+
+                <!-- weight -->
+                <div class="mb-4">
+                    <label for="editWeight" class="block text-sm font-medium text-gray-700">Weight</label>
+                    <select id="editWeight" name="weight" class="mt-1 block w-full rounded-md border-gray-300">
+                        <option value="">-- Select Weight --</option>
+                        <!-- options populated by JS -->
+                    </select>
+                </div>
+                <!-- Message -->
+                <div class="mb-4">
+                    <label for="editMessage" class="block text-sm font-medium text-gray-700">Message on Cake</label>
+                    <textarea id="editMessage" name="message" rows="3" class="mt-1 block w-full rounded-md border-gray-300"></textarea>
+                </div>
+
+                <div class="flex items-center justify-end gap-3">
+                    <button type="button" onclick="closeEditModal()"
+                        class="px-4 py-2 rounded border hover:bg-gray-50">Cancel</button>
+
+                    <button type="submit" id="editSaveBtn"
+                        class="px-4 py-2 rounded bg-orange-500 text-white hover:bg-orange-600">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
     <!-- Include SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        // Get all checkboxes
-        const checkboxes = document.querySelectorAll('.cart-checkbox');
-        const totalAmountEl = document.getElementById('totalAmount');
-        const grantTotalEl = document.getElementById('grantTotal');
-        const discountInput = document.getElementById('discount'); // optional discount input
+        // show modal
+        function showEditModal() {
+            const modal = document.getElementById('editCartModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
 
-        function calculateTotal() {
-            let total = 0;
+        // close modal
+        function closeEditModal() {
+            const modal = document.getElementById('editCartModal');
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+        }
 
-            // Sum checked items
-            checkboxes.forEach(cb => {
-                if (cb.checked) {
-                    total += parseFloat(cb.dataset.amount);
+        // Called by your edit button: editCart({{ $cart->id }})
+        async function editCart(cartId) {
+            try {
+                const res = await fetch(`/cart/${cartId}/edit`, {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!res.ok) {
+                    throw new Error('Could not fetch cart data');
                 }
-            });
 
-            // Format total with commas and 2 decimals
-            totalAmountEl.textContent = total.toLocaleString('en-US', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            });
+                const json = await res.json();
+                if (!json.success) throw new Error('Failed to fetch cart');
 
-            // Get discount value (can be percentage or fixed)
-            let discount = discountInput ? parseFloat(discountInput.value) || 0 : 0;
+                const cart = json.cart;
+                const weight = json.weights[0]['weight'];
+                const flavours = json.flavours;
+                // populate inputs
+                document.getElementById('editCartId').value = cart.id;
+                document.getElementById('editMessage').value = cart.message ?? '';
 
-            // Example: if discount is percentage
-            // let grandTotal = total - (total * discount / 100);
+                // populate weight select
+                const weightSelect = document.getElementById('editWeight');
+                weightSelect.innerHTML = '<option value="">-- Select weight --</option>';
+                json.weights.forEach(w => {
+                    const opt = document.createElement('option');
+                    opt.value = w.weight;
+                    opt.textContent = w.weight;
+                    if (cart.weight && cart.weight === w.weight) opt.selected = true;
+                    weightSelect.appendChild(opt);
+                });
 
-            // Example: if discount is fixed amount
-            let grandTotal = total - discount;
 
-            // Format Grand Total
-            grantTotalEl.textContent = grandTotal.toLocaleString('en-US', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            });
+                // populate flavour select
+                const flavourSelect = document.getElementById('editFlavour');
+                flavourSelect.innerHTML = '<option value="">-- Select flavour --</option>';
+                flavours.forEach(f => {
+                    const opt = document.createElement('option');
+                    opt.value = f.id;
+                    opt.textContent = f.names;
+                    if (cart.flavour_id && cart.flavour_id === f.id) opt.selected = true;
+                    flavourSelect.appendChild(opt);
+                });
+
+                showEditModal();
+            } catch (err) {
+                console.error(err);
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Error',
+                    timer: 3000,
+                    text: 'Failed to open edit dialog.',
+                });
+            }
         }
 
-        // Add change event listener to all checkboxes
-        checkboxes.forEach(cb => {
-            cb.addEventListener('change', calculateTotal);
+        // submit the edit form with PATCH to server
+        async function submitEditForm(event) {
+            event.preventDefault();
+
+            const cartId = document.getElementById('editCartId').value;
+            const payload = {
+                flavour_id: document.getElementById('editFlavour').value || null,
+                weight: document.getElementById('editWeight').value,
+                message: document.getElementById('editMessage').value,
+            };
+
+            // disable save button while processing
+            const saveBtn = document.getElementById('editSaveBtn');
+            saveBtn.disabled = true;
+
+            try {
+                const res = await fetch(`/cart/${cartId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                const json = await res.json();
+
+                if (res.status === 422) {
+                    // validation errors
+                    const firstError = json.errors ? Object.values(json.errors)[0][0] : 'Validation error';
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'warning',
+                        title: 'Validation',
+                        timer: 2000,
+                        text: firstError,
+                        showConfirmButton: false
+                    });
+                    saveBtn.disabled = false;
+                    return;
+                }
+
+                if (!json.success) {
+                    throw new Error(json.message || 'Update failed');
+                }
+
+                // success
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Updated',
+                    text: json.message || 'Cart item updated',
+                    timer: 1400,
+                    showConfirmButton: false
+                }).then(() => {
+                    closeEditModal();
+                    // Option 1: reload page to reflect new totals and UI
+                    location.reload();
+
+                    // Option 2: you could update the DOM in-place instead of reloading:
+                    // updateCartRowInDOM(json.cart);
+                });
+
+            } catch (err) {
+                console.error(err);
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred while updating cart.',
+                });
+                saveBtn.disabled = false;
+            }
+        }
+
+        // optional: close modal when clicking outside the panel
+        document.getElementById('editCartModal')?.addEventListener('click', function(e) {
+            if (e.target === this) closeEditModal();
         });
-
-        // If you have a discount input, update grand total on change
-        if (discountInput) {
-            discountInput.addEventListener('input', calculateTotal);
-        }
-
-        // Initial calculation
-        calculateTotal();
 
         function updateQty(cartId, qty) {
             if (qty < 1 || qty > 10) {
                 Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    timer: 2000,
                     icon: 'warning',
                     title: 'Invalid Quantity',
                     text: 'Quantity must be between 1 and 10.',
+                    showConfirmButton: false
                 });
                 return;
             }
@@ -244,6 +417,8 @@
                 .then(data => {
                     if (data.success) {
                         Swal.fire({
+                            toast: true,
+                            position: 'top-end',
                             icon: 'success',
                             title: 'Updated',
                             text: 'Cart quantity updated successfully!',
@@ -290,6 +465,8 @@
                         .then(data => {
                             if (data.success) {
                                 Swal.fire({
+                                    toast: true,
+                                    position: 'top-end',
                                     icon: 'success',
                                     title: 'Removed',
                                     text: 'Item removed from cart!',
@@ -300,6 +477,9 @@
                                 });
                             } else {
                                 Swal.fire({
+                                    toast: true,
+                                    position: 'top-end',
+                                    timer: 1500,
                                     icon: 'error',
                                     title: 'Error',
                                     text: 'Failed to remove item.',
@@ -308,6 +488,9 @@
                         })
                         .catch(error => {
                             Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                timer: 1500,
                                 icon: 'error',
                                 title: 'Error',
                                 text: 'An error occurred while removing the item.',
@@ -317,53 +500,116 @@
             });
         }
 
-        // function placeOrder(shopId) {
-        //     Swal.fire({
-        //         title: 'Confirm Order',
-        //         text: 'Are you sure you want to place this order?',
-        //         icon: 'question',
-        //         showCancelButton: true,
-        //         confirmButtonColor: '#0c9cd7',
-        //         cancelButtonColor: '#d33',
-        //         confirmButtonText: 'Yes, place order!'
-        //     }).then((result) => {
-        //         if (result.isConfirmed) {
-        //             fetch('/order/create/' + shopId, {
-        //                     method: 'POST',
-        //                     headers: {
-        //                         'Content-Type': 'application/json',
-        //                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        //                     }
-        //                 })
-        //                 .then(response => response.json())
-        //                 .then(data => {
-        //                     if (data.success) {
-        //                         Swal.fire({
-        //                             icon: 'success',
-        //                             title: 'Order Placed',
-        //                             text: 'Your order has been placed successfully!',
-        //                             timer: 1500,
-        //                             showConfirmButton: false
-        //                         }).then(() => {
-        //                             window.location.href = '/order/confirmation/' + data.orderId;
-        //                         });
-        //                     } else {
-        //                         Swal.fire({
-        //                             icon: 'error',
-        //                             title: 'Error',
-        //                             text: 'Failed to place order.',
-        //                         });
-        //                     }
-        //                 })
-        //                 .catch(error => {
-        //                     Swal.fire({
-        //                         icon: 'error',
-        //                         title: 'Error',
-        //                         text: 'An error occurred while placing the order.',
-        //                     });
-        //                 });
-        //         }
-        //     });
-        // }
+        document.addEventListener('DOMContentLoaded', () => {
+            const checkboxes = Array.from(document.querySelectorAll('.cart-checkbox'));
+            const totalAmountEl = document.getElementById('totalAmount');
+            const grantTotalEl = document.getElementById('grantTotal');
+            const discountInput = document.getElementById('discount'); // optional, may be null
+
+
+
+
+            // Format a number as "1,234.00"
+            function formatCurrency(num) {
+                return Number(num).toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            }
+
+            // Calculate totals from checked checkboxes (uses data-amount on each checkbox)
+            function calculateTotal() {
+                let total = 0;
+
+                checkboxes.forEach(cb => {
+                    if (cb.checked) {
+                        const amt = parseFloat(cb.dataset.amount || 0);
+                        total += isNaN(amt) ? 0 : amt;
+                    }
+                });
+
+                totalAmountEl.textContent = formatCurrency(total);
+                let discount = 0;
+                if (discountInput) {
+                    discount = parseFloat(discountInput.value) || 0;
+                }
+
+                const grandTotal = Math.max(0, total - discount);
+                grantTotalEl.textContent = formatCurrency(grandTotal);
+            }
+
+            // When a checkbox is changed: enforce one-shop selection and recalc totals
+            function onCheckboxChange(e) {
+                const cb = e.target;
+                if (!cb || !cb.dataset.shop) {
+                    calculateTotal();
+                    return;
+                }
+
+                if (cb.checked) {
+                    const selectedShop = cb.dataset.shop;
+                    // uncheck any checkboxes that belong to other shops
+                    let otherUnChecked = false;
+                    checkboxes.forEach(other => {
+                        if (other === cb) return;
+                        if (other.dataset.shop !== selectedShop && other.checked) {
+                            other.checked = false;
+                            otherUnChecked = true;
+                        }
+                    });
+
+                    if (otherUnChecked && typeof Swal !== 'undefined') {
+                        // toast to explain automatic uncheck
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'info',
+                            title: 'Only items from one shop can be checked. Items from other shops were unchecked.',
+                            showConfirmButton: false,
+                            timer: 4000
+                        });
+                    }
+                }
+
+                // If it was unchecked and now no checkboxes left checked, nothing to do except recalc
+                calculateTotal();
+            }
+
+            // Attach listeners
+            checkboxes.forEach(cb => cb.addEventListener('change', onCheckboxChange));
+
+            // If discount input exists, update totals when it changes
+            if (discountInput) {
+                discountInput.addEventListener('input', calculateTotal);
+            }
+
+            // Prevent accidental submission if somehow more than one shop selected (extra defensive)
+            const checkoutForm = document.getElementById('checkoutForm');
+            if (checkoutForm) {
+                checkoutForm.addEventListener('submit', (ev) => {
+                    const checked = checkboxes.filter(cb => cb.checked);
+                    const shops = new Set(checked.map(cb => cb.dataset.shop));
+                    if (shops.size > 1) {
+                        // shouldn't happen with above logic, but block submit just in case
+                        ev.preventDefault();
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                timer: 3000,
+                                icon: 'warning',
+                                title: 'Only one shop allowed',
+                                text: 'Please select items from only one shop before checkout.'
+                            });
+                        } else {
+                            alert('Please select items from only one shop.');
+                        }
+                    }
+                });
+            }
+
+            // Run initial calculation in case some boxes are pre-checked
+            calculateTotal();
+        });
     </script>
 </x-frontend-layout>

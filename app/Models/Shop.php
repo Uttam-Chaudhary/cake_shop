@@ -73,4 +73,8 @@ class Shop extends Authenticatable
     {
         return $this->hasMany(Flavour::class);
     }
+    public function deliveries(): HasMany
+    {
+        return $this->hasMany(Location::class);
+    }
 }

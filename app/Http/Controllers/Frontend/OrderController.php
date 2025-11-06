@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Models\Cart;
+use App\Models\Location;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
@@ -149,31 +150,6 @@ class OrderController extends BaseController
         return view('frontend.orders', compact('orders'));
     }
 
-    public function buyNow(Request $request, $id)
-    { {
-            $request->validate([
-                'message'  => 'required|max:20|min:1',
-                'flavour_id' => 'required',
-            ]);
-
-            $product = Product::findOrFail($id);
-            $Base_price =  $product->price / $product->weights[0]['weight'];
-            $payable_amount = $Base_price * $request->weight;
-            $amount = ($payable_amount - ($payable_amount * $product->discount_percentage) / 100);
-
-            $cart = new Cart();
-            $cart->qty = 1;
-            $cart->message = $request->message;
-            $cart->weight = $request->weight;
-            $cart->flavour_id = $request->flavour_id;
-            $cart->amount = $amount;
-            $cart->product_id = $product->id;
-            $cart->user_id = Auth::user()->id;
-            $cart->save();
-            // toast("Product added to cart", 'success');
-            return redirect()->route('cart.index');
-        }
-    }
     public function select(Request $request)
     {
         // Get selected cart IDs
@@ -193,15 +169,16 @@ class OrderController extends BaseController
         $shop = $carts->first()->product->shop;
         $shopCarts = $carts->where('product.shop_id', $shop->id);
         // Redirect or show checkout view
-        //    return view('frontend.checkout', compact('carts', 'shop', 'shopCarts'));
+        return view('frontend.checkout', compact('carts', 'shop', 'shopCarts'));
 
-        return view('frontend.multiple_order', compact('carts'));
+        //   return view('frontend.multiple_order', compact('carts'));
     }
 
 
     public function store(Request $request, $id)
     {
         $request->validate([
+            'location' => 'required',
             'contact' => 'required|string|digits:10',
             'address' => 'required|string|max:255',
             'date' => 'required|date_format:Y-m-d',
@@ -211,6 +188,7 @@ class OrderController extends BaseController
 
         // Fetch Shop using shop_id
         $shop = Shop::findOrFail($id);
+        $location = Location::findOrfail($request->location);
 
         // Fetch only selected carts for this user
         $carts = Cart::whereIn('id', $selectedIds)
@@ -226,7 +204,9 @@ class OrderController extends BaseController
         $order->order_id = "ORD-{$date}-{$random}";
         $order->shop_id = $shop->id;
         $order->user_id = Auth::user()->id;
-        $order->total_amount = $shopCarts->sum('amount');
+        $order->total_amount = $shopCarts->sum('amount') + $location->fee;
+        $order->location = $location->locality;
+        $order->delivery_fee = $location->fee;
         $order->contact = $request->contact;
         $order->status = 'pending';
         $order->delivery_address = $request->address;
@@ -244,12 +224,13 @@ class OrderController extends BaseController
             $orderItem->flavour_id = $cart->flavour_id;
             $orderItem->save();
 
-            $cart->delete();
+            //  $cart->delete();
         }
 
         $payment = new Payment();
         $payment->order_id = $order->id;
         $payment->method = $request->payment_method;
+        $payment->transaction_id = $request->transaction_id;
 
         if ($request->payment_method == 'qr_payment') {
             $file = $request->payment_receipt_image;

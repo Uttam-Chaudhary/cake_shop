@@ -11,8 +11,10 @@
                 <div class="flex items-center justify-between gap-4">
                     <div>
                         <p><strong>Order ID:</strong> {{ $order->order_id }}</p>
-                        <p><strong>Customer:</strong> {{ $order->user->name }}</p>
-                        <p><strong>Contact:</strong> {{ $order->contact }}</p>
+                        <p><strong>Order Status:</strong> {{ ucfirst($order->status) }}</p>
+                        <p><strong>Order Date:</strong> {{ $order->created_at->format('d M Y, H:i') }}</p>
+                        <p><strong>Delivery Date:</strong> {{ $order->delivery_date}}</p>
+
                     </div>
 
                     <!-- QR code container -->
@@ -20,9 +22,10 @@
                         <!-- QR will be generated here -->
                     </div>
                     <div>
+                        <p><strong>Customer:</strong> {{ $order->user->name }}</p>
+                        <p><strong>Contact:</strong> {{ $order->contact }}</p>
+                        <p><strong>Location:</strong> {{ $order->location }}</p>
                         <p><strong>Delivery Address:</strong> {{ $order->delivery_address }}</p>
-                        <p><strong>Order Status:</strong> {{ ucfirst($order->status) }}</p>
-                        <p><strong>Order Date:</strong> {{ $order->created_at->format('d M Y, H:i') }}</p>
                     </div>
                 </div>
             </div>
@@ -66,6 +69,16 @@
                         @endforeach
                     </tbody>
                     <tfoot>
+                        <tr class="font-semibold">
+                            <td colspan="6" class="border p-2 text-right text-[var(--text)]">Subtotal:</td>
+                            <td class="border p-2 text-right text-[var(--text)]">Rs.
+                                {{ number_format($order->total_amount - $order->delivery_fee, 2) }}</td>
+                        </tr>
+                        <tr class="font-semibold">
+                            <td colspan="6" class="border p-2 text-right text-[var(--text)]">Delivery Fee:</td>
+                            <td class="border p-2 text-right text-[var(--text)]">Rs.
+                                {{ number_format($order->delivery_fee, 2) }}</td>
+                        </tr>
                         <tr class="font-semibold">
                             <td colspan="6" class="border p-2 text-right text-[var(--text)]">Total Amount:</td>
                             <td class="border p-2 text-right text-[var(--text)]">Rs.

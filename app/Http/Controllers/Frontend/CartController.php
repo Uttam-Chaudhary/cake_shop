@@ -7,19 +7,74 @@ use App\Models\Flavour;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+
 
 class CartController extends BaseController
 {
+
+    public function edit($id)
+    {
+        $cart = Cart::with('product')->findOrFail($id);
+        $product = Product::findOrFail($cart->product_id);
+        $flavours = $product->flavours;
+
+        $weights = $product->weights;
+
+        return response()->json([
+            'success' => true,
+            'cart' => $cart,
+            'flavours' => $flavours,
+            'weights' => $weights,
+        ]);
+    }
+
+    // Update cart item
+    public function update(Request $request, $id)
+    {
+        $cart = Cart::findOrFail($id);
+
+        $validator = Validator::make($request->all(), [
+            'flavour_id' => 'required|integer|exists:flavours,id',
+            'weight' => 'required|numeric|min:1',
+            'message' => 'nullable|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $Base_price = $cart->product->price / $cart->product->weights[0]['weight'];
+        $payable_amount = $Base_price * $request->input('weight');
+        $cart_amount = ($payable_amount - ($payable_amount * $cart->product->discount_percentage) / 100) * $cart->qty;
+
+        $cart->flavour_id = $request->input('flavour_id');
+        $cart->weight = $request->input('weight');
+        $cart->message = $request->input('message');
+        $cart->amount = $cart_amount;
+        $cart->save();
+        return response()->json([
+            'success' => true,
+            'message' => 'Cart updated successfully',
+            'cart' => $cart,
+        ]);
+    }
+
+
     public function index()
     {
         $carts = Cart::where("user_id", Auth::user()->id)->get();
 
-      //  return $flavours;
+        // get flavours (adjust if flavours are per-product)
+        //  return $flavours;
         return view('frontend.carts', compact('carts'));
     }
     public function store(Request $request, $id)
     {
-       $request->validate([
+        $request->validate([
             'message'  => 'required|max:20|min:1',
             'flavour_id' => 'required',
         ]);
@@ -43,7 +98,34 @@ class CartController extends BaseController
         return redirect()->route('home');
     }
 
-    public function update(Request $request, $id)
+    public function buyNow(Request $request, $id)
+    { {
+            $request->validate([
+                'message'  => 'required|max:20|min:1',
+                'flavour_id' => 'required',
+            ]);
+
+            $product = Product::findOrFail($id);
+            $Base_price =  $product->price / $product->weights[0]['weight'];
+            $payable_amount = $Base_price * $request->weight;
+            $amount = ($payable_amount - ($payable_amount * $product->discount_percentage) / 100);
+
+            $cart = new Cart();
+            $cart->qty = 1;
+            $cart->message = $request->message;
+            $cart->weight = $request->weight;
+            $cart->flavour_id = $request->flavour_id;
+            $cart->amount = $amount;
+            $cart->product_id = $product->id;
+            $cart->shop_id = $product->shop_id;
+            $cart->user_id = Auth::user()->id;
+            $cart->save();
+            // toast("Product added to cart", 'success');
+            return redirect()->route('cart.index');
+        }
+    }
+
+    public function update_qty(Request $request, $id)
     {
         $request->validate([
             'qty' => 'required|integer|max:10|min:1'

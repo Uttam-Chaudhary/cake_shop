@@ -51,18 +51,35 @@
                         <!-- Delivery Information -->
                         <div class="space-y-5">
                             <div>
+                                <label for="location" class="block text-md font-medium mt-3">Choose Your
+                                    Location <span class="text-red-500">*</span></label>
+                                <select id="location" name="location" required
+                                    class="mt-1 block w-full rounded-md border-gray-300">
+                                    <option value="">Select a location</option>
+                                    @foreach ($locations as $location)
+                                        <option value="{{ $location->id }}"
+                                            {{ old('location') == $location->id ? 'selected' : '' }}>
+                                            {{ $location->locality }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('location')
+                                    <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div>
                                 <label for="address" class="block text-sm font-medium text-gray-700 mb-2">Delivery
-                                    Address</label>
+                                    Address<span class="text-red-500">*</span></label>
                                 <textarea name="address" id="address" required
                                     class="form-input mt-1 p-3 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
-                                    rows="3" placeholder="Enter your full delivery address"></textarea>
+                                    rows="3" placeholder="Enter your local address"></textarea>
                                 @error('address')
                                     <div class="text-red-500 text-sm mt-1">{{ $address }}</div>
                                 @enderror
                             </div>
                             <div>
                                 <label for="contact" class="block text-sm font-medium text-gray-700 mb-2">Contact
-                                    Number</label>
+                                    Number<span class="text-red-500">*</span></label>
                                 <input type="text" name="contact" id="contact" required
                                     class="form-input mt-1 p-3 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
                                     placeholder="Enter your phone number">
@@ -72,7 +89,7 @@
                             </div>
                             <div>
                                 <label for="date" class=" text-sm font-medium text-gray-900 ">Select Delivery
-                                    Date</label>
+                                    Date<span class="text-red-500">*</span></label>
                                 <input type="date" name="date" min="{{ date('Y-m-d') }}" value=" " required
                                     class="border border-gray-300 rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                                 @error('date')
@@ -166,11 +183,22 @@
                                         <div>
                                             <label for="payment_receipt_image"
                                                 class="block text-sm font-medium text-gray-700 mb-1">Upload Receipt
-                                                (Optional)</label>
+                                            </label>
                                             <div class="flex items-center space-x-2">
                                                 <input type="file" id="payment_receipt_image"
                                                     name="payment_receipt_image" accept="image/*"
                                                     class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                                            </div>
+                                            <div>
+                                                <label for="transaction_id"
+                                                    class=" text-sm font-medium text-gray-900 ">Transaction Code <span
+                                                        class="text-red-500">*</span></label>
+                                                <input type="text" name="transaction_id" id="transaction_id"
+                                                    value="{{ old('transaction_id') }}"
+                                                    class="border border-gray-300 rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                                                @error('transaction_id')
+                                                    <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
+                                                @enderror
                                             </div>
                                         </div>
                                     </div>
@@ -220,9 +248,6 @@
                                                 <p class="text-sm text-gray-500 mt-1">Weight: {{ $cart->weight }}
                                                     Pound
                                                 </p>
-                                                {{-- <p class="text-sm text-gray-500">Unit Price:
-                                                Rs.{{ number_format($cart->product->price * $cart->weight, 2) }}
-                                            </p> --}}
                                             </div>
                                         </div>
                                         <div class="text-base font-semibold text-gray-800 whitespace-nowrap">
@@ -235,18 +260,18 @@
                             <div class="pt-4 border-t border-gray-200 space-y-3">
                                 <div class="flex justify-between items-center">
                                     <span class="text-gray-600">Subtotal</span>
-                                    <span
+                                    <span id="subtotal"
                                         class="text-gray-800 font-medium">Rs.{{ number_format($shopCarts->sum('amount'), 2) }}</span>
                                 </div>
                                 <div class="flex justify-between items-center">
                                     <span class="text-gray-600">Delivery Fee</span>
-                                    <span class="text-gray-800 font-medium">Rs.100.00</span>
+                                    <span id="delivery_fee" class="text-gray-800 font-medium">Rs. 0.00</span>
                                 </div>
                                 <div
                                     class="flex justify-between items-center text-lg font-semibold pt-3 border-t border-gray-200">
                                     <span class="text-gray-900">Total</span>
-                                    <span
-                                        class="text-indigo-600">Rs.{{ number_format($shopCarts->sum('amount') + 100, 2) }}</span>
+                                    <span id="total"
+                                        class="text-indigo-600">Rs.{{ number_format($shopCarts->sum('amount'), 2) }}</span>
                                 </div>
                             </div>
                         </div>
@@ -269,27 +294,61 @@
 
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                const qrRadio = document.querySelector('input[value="qr_payment"]');
-                const qrReceipt = document.getElementById('qrReceipt');
-                const fileInput = document.getElementById('payment_receipt_image');
+                        const qrRadio = document.querySelector('input[value="qr_payment"]');
+                        const qrReceipt = document.getElementById('qrReceipt');
+                        const fileInput = document.getElementById('payment_receipt_image');
+                        const transactionCodeInput = document.getElementById('transaction_id');
 
-                function toggleQrReceipt() {
-                    if (qrRadio.checked) {
-                        qrReceipt.classList.remove('hidden');
-                        fileInput.setAttribute('required', 'required');
 
-                    } else {
-                        qrReceipt.classList.add('hidden');
-                        fileInput.removeAttribute('required');
-                    }
-                }
+                        const locationSelect = document.getElementById('location');
+                        const subTotal = document.getElementById('subtotal');
+                        const deliveryFee = document.getElementById('delivery_fee');
+                        const totalFee = document.getElementById('total');
 
-                document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
-                    radio.addEventListener('change', toggleQrReceipt);
-                });
+                        locationSelect.addEventListener('change', function() {
+                            const locationId = this.value;
 
-                toggleQrReceipt(); // Initial check
-            });
+                            if (!locationId) return; // do nothing if not selected
+
+                            // Fetch delivery fee from Laravel route
+                            fetch(`/get-delivery-fee/${locationId}`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    //  console.log("Fetched delivery fee:", data);
+                                    const fee = parseFloat(data.delivery_fee || 0);
+                                    deliveryFee.textContent = `Rs.${fee.toFixed(2)}`;
+
+                                    const subtotalValue = parseFloat(subTotal.textContent.replace(/Rs\.|,/g, ''));
+                                    totalFee.textContent = `Rs.${(subtotalValue + fee).toFixed(2)}`;
+                                })
+                                    .catch(error => {
+                                        console.error('Error fetching delivery fee:', error);
+                                    });
+                                });
+
+
+                            function toggleQrReceipt() {
+                                if (qrRadio.checked) {
+                                    qrReceipt.classList.remove('hidden');
+                                    fileInput.setAttribute('required', 'required');
+                                    transactionCodeInput.setAttribute('required', 'required');
+
+
+                                } else {
+                                    qrReceipt.classList.add('hidden');
+                                    fileInput.removeAttribute('required');
+                                    transactionCodeInput.removeAttribute('required');
+
+                                }
+                            }
+
+
+                            document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
+                                radio.addEventListener('change', toggleQrReceipt);
+                            });
+
+                            toggleQrReceipt(); // Initial check
+                        });
         </script>
     </section>
 </x-frontend-layout>
