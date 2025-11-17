@@ -24,7 +24,7 @@ class OrderResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::BellAlert;
 
     protected static ?string $recordTitleAttribute = 'name';
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 5;
     public static function getEloquentQuery(): Builder
     {
         return Order::where('shop_id', Auth::guard('shop')->user()->id);

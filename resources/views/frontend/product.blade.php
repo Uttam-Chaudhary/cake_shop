@@ -9,8 +9,8 @@
                     <li class="text-gray-700">{{ $product->name }}</li>
                 </ol>
             </nav>
-            <div class="grid grid-cols-2 gap-10">
-                <div class=" grid grid-cols-12 gap-5 sticky top-1 self-start h-fit">
+            <div class="grid md:grid-cols-2 gap-10">
+                <div class=" grid grid-cols-12 gap-5 md:sticky top-20 self-start h-fit">
                     <div class=" col-span-3">
                         @foreach ($product->images as $img)
                             <div
@@ -35,11 +35,18 @@
                         <input type="hidden" name="flavour_id" id="selected-flavour" value="">
 
                         <h1 class="text-xl font-semibold">{{ $product->name }}</h1>
-                        <h2 id="product-price" class="text-xl mt-3 font-semibold">
-                            Rs.{{ number_format($product->price - ($product->price * $product->discount_percentage) / 100, 2) }}
-                        </h2>
+                        <div class=" flex">
+                            <h2 id="product-price" class="text-xl mt-3 font-semibold">
+                                Rs.{{ number_format($product->price - ($product->price * $product->discount_percentage) / 100, 2) }}
+                            </h2>
+                            @if ($product->discount_percentage > 0)
+                                <h2 id="product_price" class="ml-5 text-xl mt-3 font-semibold text-red-500">Rs.<span
+                                        class=" line-through">{{ number_format($product->price, 2) }}</span></h2>
+                            @endif
+                        </div>
+
                         @if ($product->discount_percentage > 0)
-                        <span class="text-red-500">({{ $product->discount_percentage }}% off)</span>
+                            <span class="text-red-500">({{ $product->discount_percentage }}% off)</span>
                         @endif
                         <h3 class="mt-3 text-black">Choose Weight (in pound)</h3>
                         <div id="weight-buttons" class="flex flex-wrap gap-2 mt-2">
@@ -103,7 +110,7 @@
                         </div>
                         <div class="mt-3 flex space-x-12">
                             <button type="submit"
-                                class=" hover:bg-[var(--secondary)] text-[var(--primary)] hover:text-white border border-[var(--primary)] py-3 px-6 rounded-lg flex items-center transition-colors">
+                                class=" hover:bg-[var(--secondary)] text-[var(--primary)] hover:text-white border border-[var(--primary)] py-3 px-6  rounded-lg flex items-center transition-colors">
                                 <i class="fas fa-shopping-cart mr-2"></i> Add to Cart
                             </button>
 
@@ -131,9 +138,16 @@
             document.getElementById('mainImage').src = src;
         }
         document.addEventListener("DOMContentLoaded", function() {
-            const basePrice = {{ ($product->price - ($product->price * $product->discount_percentage) / 100 )/ $product->weights[0]['weight'] }};
+            const priceWithoutDiscount = {{ $product->price / $product->weights[0]['weight'] }};
+            const priceElement2 = document.getElementById("product_price");
+            const basePrice =
+                {{ ($product->price - ($product->price * $product->discount_percentage) / 100) / $product->weights[0]['weight'] }};
             const priceElement = document.getElementById("product-price");
             const weightButtons = document.querySelectorAll("#weight-buttons button");
+
+            if (priceElement2) {
+                priceElement2.classList.add("line-through");
+            }
 
             weightButtons.forEach(button => {
                 button.addEventListener("click", function() {
@@ -154,9 +168,14 @@
 
                     // Calculate total price
                     const totalPrice = basePrice * selectedWeight;
+                    const totalPriceWithoutDiscount = priceWithoutDiscount * selectedWeight;
 
                     // Update price text
                     priceElement.textContent = "Rs. " + totalPrice.toLocaleString("en-IN", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                    priceElement2.textContent = "Rs. " + totalPriceWithoutDiscount.toLocaleString("en-IN", {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2
                     });

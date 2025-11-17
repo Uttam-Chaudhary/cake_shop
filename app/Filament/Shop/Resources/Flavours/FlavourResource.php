@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Auth;
 class FlavourResource extends Resource
 {
     protected static ?string $model = Flavour::class;
+    protected static ?int $navigationSort = 3;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 

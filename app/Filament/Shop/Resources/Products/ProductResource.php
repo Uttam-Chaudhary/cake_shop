@@ -21,7 +21,7 @@ class ProductResource extends Resource
     protected static ?string $model = Product::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Cake;
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 4;
     protected static ?string $recordTitleAttribute = 'name';
 
     public static function getEloquentQuery(): Builder

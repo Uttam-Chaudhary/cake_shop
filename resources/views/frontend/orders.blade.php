@@ -20,7 +20,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($orders as $order)
+                                @foreach ($orders->sortByDesc('created_at') as $order)
                                     <tr class="border-b hover:bg-[var(--light-primary)]">
                                         <td class="p-3 text-[var(--text)]">{{ $order->order_id }}</td>
                                         <td class="p-3 text-[var(--text)]">Rs.

@@ -3,9 +3,9 @@
         <h1 class="text-2xl font-bold text-[var(--primary)] mb-3">My Cart</h1>
         <form id="checkoutForm" action="{{ route('checkout.select') }}" method="POST">
             @csrf
-            <div class="grid grid-cols-12 gap-2">
+            <div class="grid lg:grid-cols-12 gap-2">
                 <div class="col-span-8">
-                    <div class=" p-3 bg-white border border-gray-200 shadow-sm">
+                    <div class="p-3 bg-white border border-gray-200 shadow-sm">
                         <h2 class="text-xl text-red-500">SELECT ITEMS TO CHECKOUT</h2>
                     </div>
 
@@ -20,12 +20,117 @@
                     @else
                         @foreach ($carts->groupBy('product.shop_id') as $shopId => $shopCarts)
                             <h2 class="text-xl font-semibold text-[var(--primary)] ml-2 mt-2">
-                                {{ $shopCarts->first()->product->shop->name }}
+                                {{ optional($shopCarts->first()->product->shop)->name ?? 'Shop' }}
                             </h2>
                             @foreach ($shopCarts as $cart)
                                 <div class="max-w-4xl mx-auto my-4">
+                                    <div class="lg:hidden bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                                        <div
+                                            class="flex items-center gap-4 ">
+                                            <!-- Left: checkbox -->
+                                            <div class="flex-shrink-0">
+                                                <label class="inline-flex items-center">
+                                                    <input type="checkbox" name="selected_carts[]"
+                                                        value="{{ $cart->id }}"
+                                                        class="cart-checkbox h-5 w-5 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300"
+                                                        data-amount="{{ $cart->amount }}"
+                                                        data-shop="{{ $shopId }}">
+                                                </label>
+                                            </div>
+                                            <!-- Image -->
+                                            <div class="flex-shrink-0">
+                                                @php
+                                                    // safe image access; fallback to placeholder if none
+                                                    $img = null;
+                                                    if (
+                                                        !empty($cart->product) &&
+                                                        !empty($cart->product->images) &&
+                                                        isset($cart->product->images[0])
+                                                    ) {
+                                                        $img = $cart->product->images[0];
+                                                    }
+                                                @endphp
+                                                @if ($img)
+                                                    <img src="{{ asset(Storage::url($img)) }}"
+                                                        alt="{{ $cart->product->name ?? 'product' }}"
+                                                        class="w-20 h-20 object-cover rounded-md border" />
+                                                @else
+                                                    {{-- Replace with your app placeholder path if you have one --}}
+                                                    <img src="{{ asset('images/placeholder.png') }}" alt="no-image"
+                                                        class="w-20 h-20 object-cover rounded-md border" />
+                                                @endif
+                                            </div>
+
+                                            <div>
+                                                <h3 class="text-lg font-semibold text-gray-900 leading-tight">
+                                                    {{ $cart->product->name ?? 'Product' }}</h3>
+                                                <div class="mt-2 text-gray-600 text-sm space-y-0">
+                                                    <h3 class="truncate text-black">Flavour:
+                                                        @php
+                                                            $flavour = \App\Models\Flavour::find($cart->flavour_id);
+                                                        @endphp
+                                                        {{ $flavour->names ?? '-' }}
+                                                    </h3>
+                                                    <h3 class="text-black">Weight:
+                                                        {{ $cart->weight ?? '-' }}
+                                                        Pound</h3>
+                                                    <h3 class="truncate text-black">Message:
+                                                        {{ $cart->message ?? '-' }}
+                                                    </h3>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Edit / Delete icons -->
+                                        <div class="flex flex-col items-end ml-4 space-y-2">
+                                            <div class="flex items-center gap-2">
+                                                <!-- Edit -->
+                                                <button type="button"
+                                                    class="p-1 rounded hover:bg-gray-100 text-gray-600" title="Edit"
+                                                    aria-label="Edit item" onclick="editCart({{ $cart->id }})">
+                                                    <i class="fa-solid fa-pencil"></i>
+                                                </button>
+
+                                                <!-- Delete -->
+                                                <button type="button"
+                                                    class="p-1 rounded hover:bg-gray-100 text-red-600" title="Remove"
+                                                    aria-label="Remove item" onclick="deleteCart({{ $cart->id }})">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </button>
+                                            </div>
+
+                                            <!-- Price -->
+                                            <div class="text-right">
+                                                <h2 class="text-[var(--primary)] font-semibold text-lg">Rs.
+                                                    {{ number_format($cart->amount, 2) }}</h2>
+                                            </div>
+                                        </div>
+
+                                        <!-- Right: quantity controls -->
+                                        <div class="flex flex-col items-center gap-2 ml-2">
+                                            <div
+                                                class="flex items-center border border-gray-200 rounded-md overflow-hidden">
+                                                <button type="button"
+                                                    class="px-3 py-1 text-xl leading-none focus:outline-none"
+                                                    aria-label="Decrease quantity"
+                                                    onclick="updateQty({{ $cart->id }}, {{ $cart->qty - 1 }})">−</button>
+
+                                                <input type="number" value="{{ $cart->qty }}" min="1"
+                                                    max="10"
+                                                    class="w-12 text-center text-sm border-l border-r border-gray-200 focus:outline-none"
+                                                    aria-label="Quantity" readonly
+                                                    onchange="updateQty({{ $cart->id }}, this.value)" />
+
+                                                <button type="button"
+                                                    class="px-3 py-1 text-xl leading-none focus:outline-none"
+                                                    aria-label="Increase quantity"
+                                                    onclick="updateQty({{ $cart->id }}, {{ $cart->qty + 1 }})">+</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div
-                                        class="flex items-center gap-4 bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                                        class="hidden lg:flex items-center gap-4 bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                                         <!-- Left: checkbox -->
                                         <div class="flex-shrink-0">
                                             <label class="inline-flex items-center">
@@ -38,30 +143,48 @@
 
                                         <!-- Image -->
                                         <div class="flex-shrink-0">
-                                            <img src="{{ asset(Storage::url($cart->product->images[0])) }}"
-                                                alt="Princess Sugarblush"
-                                                class="w-20 h-20 object-cover rounded-md border" />
+                                            @php
+                                                // safe image access; fallback to placeholder if none
+                                                $img = null;
+                                                if (
+                                                    !empty($cart->product) &&
+                                                    !empty($cart->product->images) &&
+                                                    isset($cart->product->images[0])
+                                                ) {
+                                                    $img = $cart->product->images[0];
+                                                }
+                                            @endphp
+
+                                            @if ($img)
+                                                <img src="{{ asset(Storage::url($img)) }}"
+                                                    alt="{{ $cart->product->name ?? 'product' }}"
+                                                    class="w-20 h-20 object-cover rounded-md border" />
+                                            @else
+                                                {{-- Replace with your app placeholder path if you have one --}}
+                                                <img src="{{ asset('images/placeholder.png') }}" alt="no-image"
+                                                    class="w-20 h-20 object-cover rounded-md border" />
+                                            @endif
                                         </div>
 
                                         <!-- Middle: product info -->
                                         <div class="flex-1 min-w-0">
                                             <div class="flex items-start justify-between">
                                                 <div>
-                                                    <h3 class="text-lg font-semibold text-gray-900 leading-tight">
-                                                        {{ $cart->product->name }}</h3>
+                                                    <h3 class="text-lg font-semibold text-gray-900 leading-tight truncate w-50">
+                                                        {{ $cart->product->name ?? 'Product' }}</h3>
 
                                                     <div class="mt-2 text-gray-600 text-sm space-y-0">
                                                         <h3 class="truncate text-black">Flavour:
                                                             @php
                                                                 $flavour = \App\Models\Flavour::find($cart->flavour_id);
                                                             @endphp
-                                                            {{ $flavour->names }}
+                                                            {{ $flavour->names ?? '-' }}
                                                         </h3>
-                                                        <h3 class=" text-black">Weight:
-                                                            {{ $cart->weight }}
+                                                        <h3 class="text-black">Weight:
+                                                            {{ $cart->weight ?? '-' }}
                                                             Pound</h3>
-                                                        <h3 class=" truncate text-black">Message:
-                                                            {{ $cart->message }}
+                                                        <h3 class="truncate text-black">Message:
+                                                            {{ $cart->message ?? '-' }}
                                                         </h3>
                                                     </div>
                                                 </div>
@@ -74,7 +197,6 @@
                                                             class="p-1 rounded hover:bg-gray-100 text-gray-600"
                                                             title="Edit" aria-label="Edit item"
                                                             onclick="editCart({{ $cart->id }})">
-                                                            <!-- pencil icon -->
                                                             <i class="fa-solid fa-pencil"></i>
                                                         </button>
 
@@ -83,7 +205,6 @@
                                                             class="p-1 rounded hover:bg-gray-100 text-red-600"
                                                             title="Remove" aria-label="Remove item"
                                                             onclick="deleteCart({{ $cart->id }})">
-                                                            <!-- trash icon -->
                                                             <i class="fa-solid fa-trash"></i>
                                                         </button>
                                                     </div>
@@ -122,10 +243,9 @@
                                 </div>
                             @endforeach
                         @endforeach
-
-
                     @endif
                 </div>
+
                 <div class="col-span-4">
                     <div class="sticky top-22 max-w-sm mx-auto bg-white shadow-md rounded-lg p-6">
                         <!-- Title -->
@@ -151,9 +271,9 @@
                         <!-- Coupon Code -->
                         <div class="flex mb-2">
                             <input type="text" placeholder="Enter Coupon Code"
-                                class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                class="flex-1 lg:px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
                             <button
-                                class="bg-orange-500 text-white px-4 py-2 rounded-r-md font-semibold hover:bg-orange-600">APPLY</button>
+                                class="  bg-orange-500 text-white px-2 xl:px-4 py-2 rounded-r-md font-semibold hover:bg-orange-600">APPLY</button>
                         </div>
 
                         <!-- Promo Banner -->
@@ -163,7 +283,7 @@
 
                         <!-- Checkout Button -->
                         <button type="submit"
-                            class="bg-orange-500 hover:bg-orange-600 text-white px-32 py-3 rounded-sm font-medium">
+                            class=" bg-orange-500 hover:bg-orange-600 text-white px-32 lg:px-24 xl:px-32 py-3 rounded-sm font-medium">
                             Checkout
                         </button>
                     </div>
@@ -171,7 +291,6 @@
             </div>
         </form>
     </div>
-
 
     <!-- Edit Cart Modal -->
     <div id="editCartModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
@@ -196,7 +315,7 @@
                     <label for="editFlavour" class="block text-sm font-medium text-gray-700">Flavour</label>
                     <select id="editFlavour" name="flavour_id" class="mt-1 block w-full rounded-md border-gray-300">
                         <option value="">-- Select flavour --</option>
-                        <!-- options populated by JS -->
+                        {{-- options populated by JS --}}
                     </select>
                 </div>
 
@@ -205,9 +324,10 @@
                     <label for="editWeight" class="block text-sm font-medium text-gray-700">Weight</label>
                     <select id="editWeight" name="weight" class="mt-1 block w-full rounded-md border-gray-300">
                         <option value="">-- Select Weight --</option>
-                        <!-- options populated by JS -->
+                        {{-- options populated by JS --}}
                     </select>
                 </div>
+
                 <!-- Message -->
                 <div class="mb-4">
                     <label for="editMessage" class="block text-sm font-medium text-gray-700">Message on Cake</label>
@@ -227,7 +347,6 @@
         </div>
     </div>
 
-
     <!-- Include SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -246,7 +365,7 @@
             modal.classList.add('hidden');
         }
 
-        // Called by your edit button: editCart({{ $cart->id }})
+        // Called by your edit buttons: editCart(cartId)
         async function editCart(cartId) {
             try {
                 const res = await fetch(`/cart/${cartId}/edit`, {
@@ -263,8 +382,7 @@
                 if (!json.success) throw new Error('Failed to fetch cart');
 
                 const cart = json.cart;
-                const weight = json.weights[0]['weight'];
-                const flavours = json.flavours;
+                const flavours = json.flavours || [];
                 // populate inputs
                 document.getElementById('editCartId').value = cart.id;
                 document.getElementById('editMessage').value = cart.message ?? '';
@@ -272,14 +390,13 @@
                 // populate weight select
                 const weightSelect = document.getElementById('editWeight');
                 weightSelect.innerHTML = '<option value="">-- Select weight --</option>';
-                json.weights.forEach(w => {
+                (json.weights || []).forEach(w => {
                     const opt = document.createElement('option');
                     opt.value = w.weight;
                     opt.textContent = w.weight;
                     if (cart.weight && cart.weight === w.weight) opt.selected = true;
                     weightSelect.appendChild(opt);
                 });
-
 
                 // populate flavour select
                 const flavourSelect = document.getElementById('editFlavour');
@@ -317,7 +434,6 @@
                 message: document.getElementById('editMessage').value,
             };
 
-            // disable save button while processing
             const saveBtn = document.getElementById('editSaveBtn');
             saveBtn.disabled = true;
 
@@ -335,7 +451,6 @@
                 const json = await res.json();
 
                 if (res.status === 422) {
-                    // validation errors
                     const firstError = json.errors ? Object.values(json.errors)[0][0] : 'Validation error';
                     Swal.fire({
                         toast: true,
@@ -354,7 +469,6 @@
                     throw new Error(json.message || 'Update failed');
                 }
 
-                // success
                 Swal.fire({
                     toast: true,
                     position: 'top-end',
@@ -365,11 +479,7 @@
                     showConfirmButton: false
                 }).then(() => {
                     closeEditModal();
-                    // Option 1: reload page to reflect new totals and UI
                     location.reload();
-
-                    // Option 2: you could update the DOM in-place instead of reloading:
-                    // updateCartRowInDOM(json.cart);
                 });
 
             } catch (err) {
@@ -506,10 +616,6 @@
             const grantTotalEl = document.getElementById('grantTotal');
             const discountInput = document.getElementById('discount'); // optional, may be null
 
-
-
-
-            // Format a number as "1,234.00"
             function formatCurrency(num) {
                 return Number(num).toLocaleString('en-US', {
                     minimumFractionDigits: 2,
@@ -517,10 +623,13 @@
                 });
             }
 
-            // Calculate totals from checked checkboxes (uses data-amount on each checkbox)
+            if (!totalAmountEl || !grantTotalEl) {
+                // nothing to do if totals UI missing
+                return;
+            }
+
             function calculateTotal() {
                 let total = 0;
-
                 checkboxes.forEach(cb => {
                     if (cb.checked) {
                         const amt = parseFloat(cb.dataset.amount || 0);
@@ -529,6 +638,7 @@
                 });
 
                 totalAmountEl.textContent = formatCurrency(total);
+
                 let discount = 0;
                 if (discountInput) {
                     discount = parseFloat(discountInput.value) || 0;
@@ -536,9 +646,12 @@
 
                 const grandTotal = Math.max(0, total - discount);
                 grantTotalEl.textContent = formatCurrency(grandTotal);
+
+                // enable/disable checkout button if needed
+                const checkoutBtn = document.querySelector('#checkoutForm button[type="submit"]');
+                if (checkoutBtn) checkoutBtn.disabled = (total === 0);
             }
 
-            // When a checkbox is changed: enforce one-shop selection and recalc totals
             function onCheckboxChange(e) {
                 const cb = e.target;
                 if (!cb || !cb.dataset.shop) {
@@ -548,7 +661,6 @@
 
                 if (cb.checked) {
                     const selectedShop = cb.dataset.shop;
-                    // uncheck any checkboxes that belong to other shops
                     let otherUnChecked = false;
                     checkboxes.forEach(other => {
                         if (other === cb) return;
@@ -559,7 +671,6 @@
                     });
 
                     if (otherUnChecked && typeof Swal !== 'undefined') {
-                        // toast to explain automatic uncheck
                         Swal.fire({
                             toast: true,
                             position: 'top-end',
@@ -571,26 +682,24 @@
                     }
                 }
 
-                // If it was unchecked and now no checkboxes left checked, nothing to do except recalc
                 calculateTotal();
             }
 
-            // Attach listeners
-            checkboxes.forEach(cb => cb.addEventListener('change', onCheckboxChange));
+            if (checkboxes.length > 0) {
+                checkboxes.forEach(cb => cb.addEventListener('change', onCheckboxChange));
+            }
 
-            // If discount input exists, update totals when it changes
             if (discountInput) {
                 discountInput.addEventListener('input', calculateTotal);
             }
 
-            // Prevent accidental submission if somehow more than one shop selected (extra defensive)
             const checkoutForm = document.getElementById('checkoutForm');
             if (checkoutForm) {
                 checkoutForm.addEventListener('submit', (ev) => {
-                    const checked = checkboxes.filter(cb => cb.checked);
+                    const checked = Array.from(document.querySelectorAll('.cart-checkbox')).filter(cb => cb
+                        .checked);
                     const shops = new Set(checked.map(cb => cb.dataset.shop));
                     if (shops.size > 1) {
-                        // shouldn't happen with above logic, but block submit just in case
                         ev.preventDefault();
                         if (typeof Swal !== 'undefined') {
                             Swal.fire({
@@ -605,10 +714,24 @@
                             alert('Please select items from only one shop.');
                         }
                     }
+                    if (checked.length === 0) {
+                        ev.preventDefault();
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                timer: 2000,
+                                icon: 'warning',
+                                title: 'No Items Selected',
+                                text: 'Please select at least one item to checkout.'
+                            });
+                        } else {
+                            alert('Please select at least one item to checkout.');
+                        }
+                    }
                 });
             }
 
-            // Run initial calculation in case some boxes are pre-checked
             calculateTotal();
         });
     </script>

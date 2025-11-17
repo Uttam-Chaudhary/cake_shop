@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
 class Shop extends Authenticatable
 {
@@ -18,10 +19,14 @@ class Shop extends Authenticatable
      *
      * @var list<string>
      */
-    protected $fillable = [
+   protected $fillable = [
         'name',
         'email',
+        'phone',
         'password',
+        'photo',
+        'status',
+        'expire_date',
     ];
 
     /**
@@ -34,11 +39,7 @@ class Shop extends Authenticatable
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
+
     protected function casts(): array
     {
         return [
@@ -46,11 +47,34 @@ class Shop extends Authenticatable
             'password' => 'hashed',
         ];
     }
-    /**
-     * Get all of the categories for the Shop
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
+
+     protected static function booted()
+    {
+        static::deleting(function (Shop $shop) {
+            // If photo column contains a path (e.g. 'shops/photos/abc.jpg')
+            if ($shop->photo && Storage::disk('public')->exists($shop->photo)) {
+                Storage::disk('public')->delete($shop->photo);
+            }
+        });
+
+        // When updating, remove files that are being replaced
+        static::updating(function (Shop $shop) {
+            $original = $shop->getOriginal();
+
+            // Photo changed?
+            if (
+                isset($original['photo']) &&
+                $original['photo'] &&
+                array_key_exists('photo', $shop->getAttributes()) &&
+                $original['photo'] !== $shop->photo
+            ) {
+                if (Storage::disk('public')->exists($original['photo'])) {
+                    Storage::disk('public')->delete($original['photo']);
+                }
+            }
+        });
+    }
+
     public function categories(): HasMany
     {
         return $this->hasMany(Category::class);

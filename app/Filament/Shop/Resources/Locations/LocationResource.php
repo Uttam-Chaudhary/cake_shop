@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Auth;
 class LocationResource extends Resource
 {
     protected static ?string $model = Location::class;
-
+    protected static ?int $navigationSort = 6;
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     protected static ?string $recordTitleAttribute = 'city';

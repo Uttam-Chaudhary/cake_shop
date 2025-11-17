@@ -15,87 +15,309 @@
             display: none;
         }
     </style>
-    <section class="mt-10">
-        <div class="container m-auto">
-            <div id="default-carousel" class="relative w-full" data-carousel="slide">
-                <!-- Carousel wrapper -->
-                <div class="relative h-56 overflow-hidden rounded-lg md:h-96">
-                    <!-- Item 1 -->
-                    <div class="hidden duration-700 ease-in-out" data-carousel-item>
-                        <img src="https://img.lazcdn.com/us/domino/50afba00-d645-4b29-b953-c853e600dec0_NP-1976-688.png_2200x2200q80.png_.avif"
-                            class="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
-                            alt="...">
+    <section class="mt-0 md:mt-10">
+        @if (count($banners) > 0)
+            <div class="container m-0 md:m-auto ">
+                <div id="default-carousel" class=" relative w-full" data-carousel="slide">
+                    <!-- Carousel wrapper -->
+                    <div class="relative h-60 overflow-hidden rounded-lg">
+                        @foreach ($banners as $banner)
+                            <a href="{{ $banner->url }}">
+                                <div class="duration-700 ease-in-out" data-carousel-item>
+                                    <img src="{{ asset(Storage::url($banner->image)) }}"
+                                        class="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2 object-cover"
+                                        alt="banner">
+                                </div>
+                            </a>
+                        @endforeach
+                        @foreach ($banners as $banner)
+                            <a href="{{ $banner->url }}">
+                                <div class="duration-700 ease-in-out" data-carousel-item>
+                                    <img src="{{ asset(Storage::url($banner->image)) }}"
+                                        class="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2 object-cover"
+                                        alt="banner">
+                                </div>
+                            </a>
+                        @endforeach
                     </div>
-                    <!-- Item 2 -->
-                    <div class="hidden duration-700 ease-in-out" data-carousel-item>
-                        <img src="https://img.lazcdn.com/us/domino/0046f7cc-c51f-4676-9add-bb3697b755bf_NP-1976-688.jpg_2200x2200q80.jpg_.avif"
-                            class="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
-                            alt="...">
+
+                    <!-- Slider indicators -->
+                    <div class="absolute z-30 flex -translate-x-1/2 bottom-5 left-1/2 space-x-3 rtl:space-x-reverse">
+                        @foreach ($banners as $index => $banner)
+                            <button type="button" class="w-3 h-3 rounded-full" aria-label="Slide {{ $index + 1 }}"
+                                data-carousel-slide-to="{{ $index }}"></button>
+                        @endforeach
+                        @foreach ($banners as $index => $banner)
+                            <button type="button" class="w-3 h-3 rounded-full" aria-label="Slide {{ $index + 1 }}"
+                                data-carousel-slide-to="{{ $index }}"></button>
+                        @endforeach
                     </div>
-                    <!-- Item 3 -->
-                    <div class="hidden duration-700 ease-in-out" data-carousel-item>
-                        <img src="https://img.lazcdn.com/us/domino/9086a7a8-ef00-45f7-83f1-da1bfd5e6c6b_NP-1976-688.jpg_2200x2200q80.jpg_.avif"
-                            class="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
-                            alt="...">
-                    </div>
-                    <!-- Item 4 -->
-                    <div class="hidden duration-700 ease-in-out" data-carousel-item>
-                        <img src="https://img.lazcdn.com/us/domino/b090f9a9-3148-4a9f-b446-ef8f954d9fe9_NP-1976-688.jpg_2200x2200q80.jpg_.avif"
-                            class="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
-                            alt="...">
-                    </div>
-                    <!-- Item 5 -->
-                    <div class="hidden duration-700 ease-in-out" data-carousel-item>
-                        <img src="https://img.lazcdn.com/us/domino/b29ae191-0179-4597-b7a7-bc104a22f9db_NP-1976-688.jpg_2200x2200q80.jpg_.avif"
-                            class="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
-                            alt="...">
-                    </div>
+
+                    <!-- Slider controls -->
+                    <button type="button"
+                        class="absolute top-0 start-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
+                        data-carousel-prev>
+                        <span
+                            class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70">
+                            <svg class="w-4 h-4 text-white dark:text-gray-800 rtl:rotate-180"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                    stroke-width="2" d="M5 1 1 5l4 4" />
+                            </svg>
+                            <span class="sr-only">Previous</span>
+                        </span>
+                    </button>
+                    <button type="button"
+                        class="absolute top-0 end-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
+                        data-carousel-next>
+                        <span
+                            class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70">
+                            <svg class="w-4 h-4 text-white dark:text-gray-800" xmlns="http://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 6 10">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                    stroke-width="2" d="m1 9 4-4-4-4" />
+                            </svg>
+                            <span class="sr-only">Next</span>
+                        </span>
+                    </button>
                 </div>
-                <!-- Slider indicators -->
-                <div class="absolute z-30 flex -translate-x-1/2 bottom-5 left-1/2 space-x-3 rtl:space-x-reverse">
-                    <button type="button" class="w-3 h-3 rounded-full" aria-current="true" aria-label="Slide 1"
-                        data-carousel-slide-to="0"></button>
-                    <button type="button" class="w-3 h-3 rounded-full" aria-current="false" aria-label="Slide 2"
-                        data-carousel-slide-to="1"></button>
-                    <button type="button" class="w-3 h-3 rounded-full" aria-current="false" aria-label="Slide 3"
-                        data-carousel-slide-to="2"></button>
-                    <button type="button" class="w-3 h-3 rounded-full" aria-current="false" aria-label="Slide 4"
-                        data-carousel-slide-to="3"></button>
-                    <button type="button" class="w-3 h-3 rounded-full" aria-current="false" aria-label="Slide 5"
-                        data-carousel-slide-to="4"></button>
-                </div>
-                <!-- Slider controls -->
-                <button type="button"
-                    class="absolute top-0 start-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
-                    data-carousel-prev>
-                    <span
-                        class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70 group-focus:outline-none">
-                        <svg class="w-4 h-4 text-white dark:text-gray-800 rtl:rotate-180" aria-hidden="true"
-                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M5 1 1 5l4 4" />
-                        </svg>
-                        <span class="sr-only">Previous</span>
-                    </span>
-                </button>
-                <button type="button"
-                    class="absolute top-0 end-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
-                    data-carousel-next>
-                    <span
-                        class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70 group-focus:outline-none">
-                        <svg class="w-4 h-4 text-white dark:text-gray-800 rtl:rotate-180" aria-hidden="true"
-                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="m1 9 4-4-4-4" />
-                        </svg>
-                        <span class="sr-only">Next</span>
-                    </span>
-                </button>
+
             </div>
-        </div>
+        @endif
+
     </section>
 
+    <section class=" bg-gray-100 mt-10">
+        @foreach ($categories->take(2) as $category)
+            @if (count($category->products->where('status', 1)) > 0)
+                <div class=" container m-auto">
+                    <div class=" flex items-center justify-between">
+                        <div class=" mt-10">
+                            <h1 class=" text-2xl font-semibold">{{ $category->title }}</h1>
+                            <h3 class="py-1 text-black">{{ $category->heading }}</h3>
+                        </div>
+                        <div
+                            class="bg-[var(--primary)] rounded-3xl hover:bg-[var(--secondary)] transition duration-300">
+                            <div class="py-2 px-4 text-white font-medium">
+                                <a href="{{ route('category', $category->slug) }}">View All</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                            @php
+                                $products = $category->products->where('status', 1)->sortByDesc('created_at');
+                            @endphp
+                            @foreach ($products->take(8) as $product)
+                                <a href="{{ route('product', $product->id) }}">
+                                    <div
+                                        class="mt-5 max-w-xs bg-white border border-gray-200 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 dark:bg-gray-800 dark:border-gray-700">
+                                        <div class="relative rounded-t-2xl overflow-hidden h-56 group">
+                                            <img class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-110 group-hover:shadow-2xl"
+                                                src="{{ asset(Storage::url($product->images[0])) }}" alt="Cake" />
+                                            @if ($product->discount_percentage > 0)
+                                                <span class="absolute top-0 right-0 bg-[red] text-white px-4 py-1">
+                                                    {{ $product->discount_percentage }}% off
+                                                </span>
+                                            @endif
+                                        </div>
+                                        <div class="p-4 mb-3">
+                                            <h3
+                                                class="mb-2 text-sm md:text-md font-medium text-black truncate md:w-40 lg:w-42 xl:w-50">
+                                                {{ $product->name }}
+                                            </h3>
+                                            <h5
+                                                class="mb-2 text-xs md:text-md font-bold tracking-tight text-gray-900 dark:text-white">
+                                                Rs.
+                                                {{ number_format($product->price - ($product->price * $product->discount_percentage) / 100, 2) }}
+                                                @if ($product->discount_percentage > 0)
+                                                    <span class="ml-1  md:ml-5 text-[red] line-through">
+                                                        Rs. {{ number_format($product->price, 2) }}
+                                                    </span>
+                                                @endif
+                                            </h5>
+                                        </div>
+                                    </div>
+                                </a>
+                            @endforeach
+                        </div>
+
+                        {{-- SEE MORE LINK --}}
+                        @if ($products->count() > 8)
+                            <div class="mt-5 flex justify-end">
+                                <a href="{{ route('category', $category->slug) }}"
+                                    class="px-5 py-2 bg-[var(--primary)] text-white rounded-3xl  hover:bg-[var(--secondary)] transition duration-300">
+                                    See More →
+                                </a>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="mt-10 h-[1px] bg-gray-300"> </div>
+                </div>
+            @endif
+        @endforeach
+        {{-- banner-section --}}
+        @if (count($banners) > 0)
+            <section class="bg-white py-10">
+                <div class="container mx-auto">
+                    @php
+                        $latestBanner = $banners->sortByDesc('created_at')->first();
+                    @endphp
+                    @if ($latestBanner)
+                        <a href="{{ $latestBanner->url }}" class="hover:shadow-2xl transform duration-300"
+                            target="_blank" rel="noopener noreferrer">
+                            <div class="h-28 md:h-40 lg:h-50 xl:h-65 overflow-hidden rounded-lg">
+                                <img class="object-cover h-full w-full"
+                                    src="{{ asset(Storage::url($latestBanner->image)) }}" alt="Latest banner" />
+                            </div>
+                        </a>
+                    @endif
+                </div>
+            </section>
+        @endif
+
+        @foreach ($categories->skip(2) as $category)
+            @if (count($category->products->where('status', 1)) > 0)
+                <div class=" container m-auto">
+                    <div class=" flex items-center justify-between">
+                        <div class=" mt-10">
+                            <h1 class=" text-2xl font-semibold">{{ $category->title }}</h1>
+                            <h3 class="py-1 text-sm md:text-lg text-black">{{ $category->heading }}</h3>
+                        </div>
+                        <div
+                            class="bg-[var(--primary)] rounded-3xl hover:bg-[var(--secondary)] transition duration-300">
+                            <div class="py-2 px-4 text-white font-medium">
+                                <a href="{{ route('category', $category->slug) }}">View All</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                            @php
+                                $products = $category->products->where('status', 1)->sortByDesc('created_at');
+                            @endphp
+                            @foreach ($products->take(8) as $product)
+                                <a href="{{ route('product', $product->id) }}">
+                                    <div
+                                        class="mt-5 max-w-xs bg-white border border-gray-200 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 dark:bg-gray-800 dark:border-gray-700">
+                                        <div class="relative rounded-t-2xl overflow-hidden h-56 group">
+                                            <img class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-110 group-hover:shadow-2xl"
+                                                src="{{ asset(Storage::url($product->images[0])) }}"
+                                                alt="Cake" />
+                                            @if ($product->discount_percentage > 0)
+                                                <span class="absolute top-0 right-0 bg-[red] text-white px-4 py-1">
+                                                    {{ $product->discount_percentage }}% off
+                                                </span>
+                                            @endif
+                                        </div>
+                                        <div class="p-4 mb-3">
+                                            <h3
+                                                class="mb-2 text-sm md:text-md font-medium text-black truncate md:w-40 lg:w-42 xl:w-50">
+                                                {{ $product->name }}
+                                            </h3>
+                                            <h5
+                                                class="mb-2 text-xs md:text-md font-bold tracking-tight text-gray-900 dark:text-white">
+                                                Rs.
+                                                {{ number_format($product->price - ($product->price * $product->discount_percentage) / 100, 2) }}
+                                                @if ($product->discount_percentage > 0)
+                                                    <span class="ml-1  md:ml-5 text-[red] line-through">
+                                                        Rs. {{ number_format($product->price, 2) }}
+                                                    </span>
+                                                @endif
+                                            </h5>
+                                        </div>
+                                    </div>
+                                </a>
+                            @endforeach
+                        </div>
+
+                        {{-- SEE MORE LINK --}}
+                        @if ($products->count() > 8)
+                            <div class="mt-5 flex justify-end">
+                                <a href="{{ route('category', $category->slug) }}"
+                                    class="px-5 py-2 bg-[var(--primary)] text-white rounded-3xl  hover:bg-[var(--secondary)] transition duration-300">
+                                    See More →
+                                </a>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="mt-10 h-[1px] bg-gray-300"> </div>
+                </div>
+            @endif
+        @endforeach
+    </section>
     <section>
+        <div class="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-8 mt-10">
+            <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">
+                <i class="fas fa-store text-[var(--primary)]"></i> Request to Open Shop
+            </h2>
+
+            <form action="{{ route('shop.store') }}" method="POST" enctype="multipart/form-data"
+                class="space-y-5">
+                @csrf
+
+                <!-- Shop Name -->
+                <div>
+                    <label class="block mb-2 text-gray-700 font-medium">
+                        <i class="fas fa-tag mr-2 text-[var(--primary)]"></i> Shop Name
+                    </label>
+                    <input type="text" name="name" value="{{ old('name') }}"
+                        class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-600 focus:outline-none"
+                        placeholder="Enter your shop name" required />
+                    @error('name')
+                        <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label class="block mb-2 text-gray-700 font-medium">
+                        <i class="fas fa-envelope mr-2 text-[var(--primary)]"></i> Email
+                    </label>
+                    <input type="email" name="email" value="{{ old('email') }}"
+                        class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-600 focus:outline-none"
+                        placeholder="Enter your email" required />
+                    @error('email')
+                        <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <!-- Phone -->
+                <div>
+                    <label class="block mb-2 text-gray-700 font-medium">
+                        <i class="fas fa-phone mr-2 text-[var(--primary)]"></i> Phone
+                    </label>
+                    <input type="text" name="phone" value="{{ old('phone') }}"
+                        class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-600 focus:outline-none"
+                        placeholder="Enter your phone number" required />
+                    @error('phone')
+                        <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <!-- Shop Photo -->
+                <div>
+                    <label class="block mb-2 text-gray-700 font-medium">
+                        <i class="fas fa-image mr-2 text-[var(--primary)]"></i> Shop Photo
+                    </label>
+                    <input type="file" name="photo"
+                        class="w-full border rounded-lg px-4 py-2 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-white file:bg-[var(--primary)] hover:file:bg-[var(--secondary  )]" />
+                    @error('photo')
+                        <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <!-- Submit -->
+                <div class="text-center">
+                    <button type="submit"
+                        class="bg-[var(--primary)] text-white px-6 py-2 rounded-lg hover:bg-[var(--secondary    )] transition">
+                        <i class="fas fa-paper-plane mr-2"></i> Submit Request
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+    {{-- <section>
         <div class=" container m-auto">
             <div class="flex items-center justify-center mt-5">
                 <div class="w-full max-w-8xl ">
@@ -205,135 +427,5 @@
                 }, 100);
             });
         </script>
-    </section>
-
-    <section class=" bg-gray-100 mt-10">
-        @foreach ($categories as $category)
-            @if (count($category->products) > 0)
-                <div class=" container m-auto">
-                    <div class=" flex items-center justify-between">
-                        <div class=" mt-10">
-                            <h1 class=" text-2xl font-semibold">{{ $category->title }}</h1>
-                            <h3 class="py-1 text-black">{{ $category->heading }}</h3>
-                        </div>
-                        <div
-                            class="bg-[var(--primary)] rounded-3xl hover:bg-[var(--secondary)] transition duration-300">
-                            <div class="py-2 px-4 text-white font-medium">
-                                <a href="{{ route('category', $category->slug) }}">View All</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="grid grid-cols-4 gap-5">
-                            @foreach ($category->products->where('status', 1) as $product)
-                                <a href="{{ route('product', $product->id) }}">
-                                    <div
-                                        class="mt-5 max-w-xs bg-white border border-gray-200 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 dark:bg-gray-800 dark:border-gray-700">
-                                        <div class="relative rounded-t-2xl overflow-hidden h-56 group">
-                                            <img class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-110 group-hover:shadow-2xl"
-                                                src="{{ asset(Storage::url($product->images[0])) }}" alt="Cake" />
-                                            @if ($product->discount_percentage > 0)
-                                                <span class="absolute top-0 right-0 bg-[red] text-white px-4 py-1">
-                                                    {{ $product->discount_percentage }}% off
-                                                </span>
-                                            @endif
-                                        </div>
-                                        <div class="p-6 mb-3">
-                                            <h3 class="mb-2 text-md font-medium text-black truncate w-50">
-                                                {{ $product->name }}
-                                            </h3>
-                                            <h5
-                                                class="mb-2 text-md font-bold tracking-tight text-gray-900 dark:text-white">
-                                                 Rs.{{ number_format($product->price - ($product->price * $product->discount_percentage) / 100 , 2)}}
-                                            @if ($product->discount_percentage > 0)
-                                                <span class=" ml-5 text-[red] line-through">
-                                                    Rs.{{ number_format($product->price, 2) }}
-                                                </span>
-                                            @endif
-                                            </h5>
-                                        </div>
-                                    </div>
-                                </a>
-                            @endforeach
-                        </div>
-                    </div>
-                    <div class="mt-10 h-[1px] bg-gray-300"> </div>
-                </div>
-            @endif
-        @endforeach
-    </section>
-
-    <section>
-        <div class="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-8 mt-10">
-            <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">
-                <i class="fas fa-store text-[var(--primary)]"></i> Request to Open Shop
-            </h2>
-
-            <form action="{{ route('shop.store') }}" method="POST" enctype="multipart/form-data"
-                class="space-y-5">
-                @csrf
-
-                <!-- Shop Name -->
-                <div>
-                    <label class="block mb-2 text-gray-700 font-medium">
-                        <i class="fas fa-tag mr-2 text-[var(--primary)]"></i> Shop Name
-                    </label>
-                    <input type="text" name="name" value="{{ old('name') }}"
-                        class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-600 focus:outline-none"
-                        placeholder="Enter your shop name" required />
-                    @error('name')
-                        <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <!-- Email -->
-                <div>
-                    <label class="block mb-2 text-gray-700 font-medium">
-                        <i class="fas fa-envelope mr-2 text-[var(--primary)]"></i> Email
-                    </label>
-                    <input type="email" name="email" value="{{ old('email') }}"
-                        class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-600 focus:outline-none"
-                        placeholder="Enter your email" required />
-                    @error('email')
-                        <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <!-- Phone -->
-                <div>
-                    <label class="block mb-2 text-gray-700 font-medium">
-                        <i class="fas fa-phone mr-2 text-[var(--primary)]"></i> Phone
-                    </label>
-                    <input type="text" name="phone" value="{{ old('phone') }}"
-                        class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-600 focus:outline-none"
-                        placeholder="Enter your phone number" required />
-                    @error('phone')
-                        <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <!-- Shop Photo -->
-                <div>
-                    <label class="block mb-2 text-gray-700 font-medium">
-                        <i class="fas fa-image mr-2 text-[var(--primary)]"></i> Shop Photo
-                    </label>
-                    <input type="file" name="photo"
-                        class="w-full border rounded-lg px-4 py-2 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-white file:bg-[var(--primary)] hover:file:bg-[var(--secondary  )]" />
-                    @error('photo')
-                        <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <!-- Submit -->
-                <div class="text-center">
-                    <button type="submit"
-                        class="bg-[var(--primary)] text-white px-6 py-2 rounded-lg hover:bg-[var(--secondary    )] transition">
-                        <i class="fas fa-paper-plane mr-2"></i> Submit Request
-                    </button>
-                </div>
-            </form>
-        </div>
-    </section>
-
-
+    </section> --}}
 </x-frontend-layout>

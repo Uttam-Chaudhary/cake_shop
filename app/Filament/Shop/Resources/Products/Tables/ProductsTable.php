@@ -6,7 +6,9 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 
@@ -16,16 +18,17 @@ class ProductsTable
     {
         return $table
             ->columns([
-                TextColumn::make('name')
+                TextInputColumn::make('name')
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('category.title')
                     ->sortable()
                     ->searchable(),
-                    ImageColumn::make('images')
+                ImageColumn::make('images')
                     ->searchable(),
                 TextColumn::make('price')
                     ->money('Rs.')
+                    ->summarize(Sum::make()->money('Rs. ')->label('Total'))
                     ->sortable(),
                 TextColumn::make('discount_percentage')
                     ->label('Discount')

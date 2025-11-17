@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
+use App\Models\Banner;
 use App\Models\Category;
 use App\Models\Company;
 use App\Models\Location;
@@ -15,12 +16,12 @@ class BaseController extends Controller
     {
         $company = Company::first();
         $categories = Category::all();
-        $locations = Location::all();
+        $banner = Banner::all();
 
         View::share([
             'company' => $company,
             'categories' => $categories,
-            'locations' => $locations
+            'banners' => $banner
         ]);
     }
 }

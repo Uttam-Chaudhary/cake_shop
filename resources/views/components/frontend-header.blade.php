@@ -7,7 +7,7 @@
         </a>
 
         <!-- Search -->
-        <div class="w-1/2">
+        <div class="hidden md:block w-1/2">
             <form action="{{ route('search') }}" method="get">
                 <div class="relative">
                     <input type="text" placeholder="Search for Cakes..." name="q"
@@ -34,11 +34,14 @@
                     </a>
 
                     <button id="dropdownDefaultButton" data-dropdown-toggle="dropdown" type="button"
-                        class="flex items-center gap-1 bg-[var(--primary)] text-white rounded-full text-sm font-medium">
-                        {{-- <span>
-                            {{ Str::substr(Auth::user()->name, 0, 1) }}
-                        </span> --}}
-                        <img src="{{ Auth::user()->avatar }}" class="w-8 h-8 rounded-full" alt="">
+                        class="flex items-center justify-center gap-1 bg-[var(--primary)] text-white rounded-full text-sm font-medium">
+                        @if (Auth::user()->avatar)
+                            <img src="{{ Auth::user()->avatar }}" class="w-8 h-8 rounded-full" alt="">
+                        @else
+                            <span class="px-3 py-2 rounded-full ">
+                                {{ Str::substr(Auth::user()->name, 0, 1) }}
+                            </span>
+                        @endif
                     </button>
                 </div>
 
@@ -70,8 +73,7 @@
                 <div id="dropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44">
                     <ul class="py-2 text-sm text-gray-700" aria-labelledby="dropdownDefaultButton">
                         <li>
-                            <a href="{{route('login')}}"
-                                class="block px-4 py-2 hover:bg-gray-100">User</a>
+                            <a href="{{ route('login') }}" class="block px-4 py-2 hover:bg-gray-100">User</a>
                         </li>
                         <li>
                             <a href="/shop" target="_blank" class="block px-4 py-2 hover:bg-gray-100">Shop</a>
@@ -84,12 +86,30 @@
             @endif
         </div>
     </div>
+
+    <!-- Search -->
+    <div class=" container mx-auto md:hidden pb-2">
+        <form action="{{ route('search') }}" method="get">
+            <div class="relative">
+                <input type="text" placeholder="Search for Cakes..." name="q"
+                    class="w-full rounded-full border border-gray-300 py-2 pl-4 pr-10 focus:outline-none focus:ring-2"
+                    style="--tw-ring-color: var(--secondary);" />
+                <button class="absolute right-2 top-1/2 -translate-y-1/2 text-white px-3 py-1 rounded-full"
+                    style="background: var(--secondary)">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
 </header>
 <section>
-    <header class="w-full shadow-lg bg-white">
-        <div class="container mx-auto flex items-center px-4 py-2 gap-5">
+    <header class="hidden sm:block w-full shadow-lg bg-white">
+        <div
+            class="container mx-auto w-sm md:flex flex-wrap grid grid-cols-2 sm:grid-cols-3 items-center px-4 py-2 gap-x-10 gap-y-5">
+
             <!-- Categories -->
-            @foreach ($categories as $category)
+            @foreach ($categories->take(8) as $category)
                 <a href="{{ route('category', $category->slug) }}"
                     class="{{ request()->routeIs('category') && request()->route('slug') == $category->slug ? 'text-[var(--secondary)] font-semibold' : 'text-[var(--black-text)]' }} hover:text-[var(--secondary)] flex items-center gap-2 font-semibold">{{ $category->title }}
                 </a>

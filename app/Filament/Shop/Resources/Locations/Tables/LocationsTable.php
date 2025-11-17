@@ -7,6 +7,8 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\TextInputColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 
 class LocationsTable
@@ -15,15 +17,19 @@ class LocationsTable
     {
         return $table
             ->columns([
-                TextColumn::make('city')
+                TextInputColumn::make('city')
+                    ->sortable()
                     ->searchable(),
-                TextColumn::make('locality')
+                TextInputColumn::make('locality')
+                    ->sortable()
                     ->searchable(),
                 TextColumn::make('fee')
+                    ->prefix('Rs. ')
                     ->numeric()
                     ->sortable(),
-                IconColumn::make('is_active')
-                    ->boolean(),
+                ToggleColumn::make('is_active')
+                    ->label('Status')
+                    ->tooltip(fn($record) => $record->is_active ? 'Active' : 'Inactive'),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

@@ -2,14 +2,14 @@
     <div class=""
         style=" background-size: cover; background-image: url('https://png.pngtree.com/thumb_back/fh260/background/20251018/pngtree-glossy-chocolate-cake-slice-on-dark-plate-in-warm-light-image_19856531.webp');">
         <div class="container m-auto">
-            <div class="grid grid-cols-4 gap-8">
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 <div class=" logo p-5 ">
                     <img src="https://juliescakes.com.np/assets/images/julies.png" alt="logo">
                     <p style="color: white">&copy; 2023 Julies Cakes</p>
                 </div>
-                <div class=" my-5">
+                <div class=" sm:my-5">
                     <h2 class="text-2xl font-semibold mb-2 text-white">Know us</h2>
-                    <ul class="space-y-2 mt-10 text-white">
+                    <ul class="space-y-2 lg:mt-10 text-white">
                         <li><a class="hover:text-red-500 duration-300 hover:underline" href="#">Our Store</a></li>
                         <li><a class="hover:text-red-500 duration-300 hover:underline" href="#">Blog</a></li>
                         <li><a class="hover:text-red-500 duration-300 hover:underline" href="#">Contact Us</a>
@@ -20,9 +20,9 @@
                                 Offers</a></li>
                     </ul>
                 </div>
-                <div class=" my-5">
+                <div class=" sm:my-5">
                     <h2 class="text-2xl font-semibold mb-2 text-white">Need Help</h2>
-                    <ul class="space-y-2 mt-10 text-white">
+                    <ul class="space-y-2 lg:mt-10 text-white">
                         <li><a class="hover:text-red-500 duration-300 hover:underline" href="#">FAQs</a></li>
                         <li><a class="hover:text-red-500 duration-300 hover:underline" href="#">Cancellation and
                                 Refund</a></li>
@@ -32,9 +32,9 @@
                                 Conditions</a></li>
                     </ul>
                 </div>
-                <div class=" my-5">
+                <div class=" sm:my-5">
                     <h2 class="text-2xl font-semibold mb-2 text-white">Find Us</h2>
-                    <div class=" flex space-x-4 items-center mt-10">
+                    <div class=" flex space-x-4 items-center lg:mt-10">
                         <a href="https://facebook.com" target="_blank"
                             class="text-white hover:text-blue-600 transition-colors duration-300">
                             <i class="fab fa-facebook-f text-2xl"></i>

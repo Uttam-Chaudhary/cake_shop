@@ -5,8 +5,8 @@
         </div>
     </section>
     <section class=" mt-5">
-        <div class=" container mx-auto flex items-center gap-1  text-2xl font-semibold ">
-            <h3 class="text-[var(--secondary)]">{{ $category->title }} </h3> : <span
+        <div class=" container mx-auto md:flex items-center gap-1  text-2xl font-semibold ">
+            <h3 class="text-[var(--secondary)]">{{ $category->title }} :- </h3><span
                 class=" text-[var(--text-black)]">{{ $category->heading }}</span>
         </div>
         <div class="container pt-5 mx-auto text-[var(--text-black)] text-xl">
@@ -15,7 +15,7 @@
     </section>
 
     <section class="container mx-auto ">
-        <div class="grid grid-cols-4 gap-5 mt-8">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 mt-8">
             @foreach ($products as $product)
                 <a href="{{ route('product', $product->id) }}">
                     <div
@@ -31,14 +31,16 @@
                             <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent rounded-t-2xl">
                             </div>
                         </div>
-                        <div class="p-6 mb-3">
-                            <h3 class="mb-2 text-md font-medium text-black truncate w-50">{{ $product->name }}
+                        <div class="p-4 mb-3">
+                            <h3 class="mb-2 text-sm md:text-md font-medium text-black truncate md:w-40 lg:w-42 xl:w-50">
+                                {{ $product->name }}
                             </h3>
-                            <h5 class="mb-2 text-md font-bold tracking-tight text-gray-900 dark:text-white">
-                                Rs.{{ number_format($product->price - ($product->price * $product->discount_percentage) / 100, 2) }}
+                            <h5 class="mb-2 text-xs md:text-md font-bold tracking-tight text-gray-900 dark:text-white">
+                                Rs.
+                                {{ number_format($product->price - ($product->price * $product->discount_percentage) / 100, 2) }}
                                 @if ($product->discount_percentage > 0)
-                                    <span class=" ml-5 text-[red] line-through">
-                                        Rs.{{ number_format($product->price, 2) }}
+                                    <span class="ml-1  md:ml-5 text-[red] line-through">
+                                        Rs. {{ number_format($product->price, 2) }}
                                     </span>
                                 @endif
                             </h5>

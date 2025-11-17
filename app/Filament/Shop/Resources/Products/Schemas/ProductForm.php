@@ -26,10 +26,9 @@ class ProductForm
                         'flavours',
                         'names',
                         modifyQueryUsing: fn($query) => $query->where('shop_id', Auth::guard('shop')->user()->id)
-
                     )
                     ->createOptionForm([
-                         Hidden::make('shop_id')
+                        Hidden::make('shop_id')
                             ->default(Auth::guard('shop')->user()->id),
                         TextInput::make('names')
                             ->label('Flavour Name')
@@ -59,12 +58,12 @@ class ProductForm
                     ->columns(1)
                     ->addActionLabel('Add weight')
                     ->minItems(1),
-                RichEditor::make('description')
-                    ->required()
-                    ->columnSpanFull(),
                 FileUpload::make('images')
                     ->required()
                     ->multiple(),
+                RichEditor::make('description')
+                    ->required()
+                    ->columnSpanFull(),
             ]);
     }
 }
